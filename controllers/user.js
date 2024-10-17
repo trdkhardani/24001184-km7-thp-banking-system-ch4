@@ -6,16 +6,35 @@ const prisma = new PrismaClient()
 
 // import Joi, { date } from "joi";
 
-import bcrypt from 'bcrypt';
+const encrypt = (password) => {
+    password = btoa(password)
+    return password;
+}
 
 router.post('/', async (req, res, next) => {
-    // const {name, email, password} = req.body
+    let password = req.body.password;
+    password = encrypt(password)
+
+    let email = req.body.email;
+    let user = await prisma.user.findUnique({
+        where: {
+            email: email,
+        }
+    })
+
+    if(user){
+        return res.status(409).json({
+            status: 'failed',
+            message: "Email has already been taken"
+        })
+    }
+
     try{
         let user = await prisma.user.create({
             data: {
                 name: req.body.name,
-                email: req.body.email,
-                password: req.body.password,
+                email: email,
+                password: password,
                 profile: {
                     create: 
                         {
