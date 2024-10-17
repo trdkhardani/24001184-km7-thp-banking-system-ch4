@@ -1,7 +1,7 @@
 import { PrismaClient, Prisma } from '@prisma/client'
 const prisma = new PrismaClient()
 
-import Joi from "joi";
+// import Joi, { date } from "joi";
 
 import bcrypt from 'bcrypt';
 
@@ -84,7 +84,40 @@ router.get('/api/v1/users/:userId', async (req, res, next) => {
     } catch(err) {
         next(err)
     }
+})
 
+router.post('/api/v1/accounts', async (req, res, next) => {
+    const userId = Number(req.body.user_id)
+    try {
+        let getUserId = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        })
+
+        if(!getUserId){
+            return res.status(409).json({
+                status: 'failed',
+                message: `No user with user_id ${req.body.user_id}`
+            })
+        }
+
+        let account = await prisma.bank_Account.create({
+            data: {
+                user_id: userId,
+                bank_name: req.body.bank_name,
+                bank_account_number: req.body.bank_account_number,
+                balance: req.body.balance
+            }
+        })
+        
+        return res.status(201).json({
+            status: 'success',
+            message: `successfully added account for user_id ${account.user_id}`
+        })
+    } catch(err) {
+        next(err);
+    }
 })
 
 export default router;
