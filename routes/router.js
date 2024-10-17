@@ -22,23 +22,22 @@ router.post('/api/v1/users', async (req, res, next) => {
             data: {
                 name: req.body.name,
                 email: req.body.email,
-                password: req.body.password
-            }
+                password: req.body.password,
+                profile: {
+                    create: 
+                        {
+                            identity_type: req.body.identity_type,
+                            identity_number: req.body.identity_number,
+                            address: req.body.address
+                        }
+                }
+            },
         })
-    
-        let profile = await prisma.profile.create({
-            data: {
-                user_id: user.id,
-                identity_type: req.body.identity_type,
-                identity_number: req.body.identity_number,
-                address: req.body.address
-            }
-        });
     
         return res.status(201).json({
             status: 'success',
             message: `Successfully added ${user.name}'s data`,
-            profile: profile,
+            user: user,
         })
     } catch(err){
         next(err)
