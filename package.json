@@ -16,6 +16,7 @@
     "24001184-km7-thp-banking-system-ch4": "file:",
     "bcrypt": "^5.1.1",
     "express": "^4.21.1",
+    "express-promise-router": "^4.1.1",
     "joi": "^17.13.3"
   },
   "devDependencies": {
