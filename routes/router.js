@@ -251,4 +251,49 @@ router.get('/api/v1/transactions', async (req, res, next) => {
     }
 })
 
+router.get('/api/v1/transactions/:transaction', async (req, res, next) => {
+    const transactionId = Number(req.params.transaction)
+    try{
+        let transaction = await prisma.transaction.findUnique({
+            where: {
+                id: transactionId,
+            }, 
+            include: {
+                sourceAccount: {
+                    include: {
+                        user: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                },
+                destinationAccount: {
+                    include: {
+                        user: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        if(!transaction){
+            return res.status(404).json({
+                status: 'failed',
+                message: `Transaction with id ${transactionId} not found`
+            })
+        }
+
+        return res.json({
+            status: 'success',
+            transaction: transaction
+        })
+    } catch(err) {
+        next(err)
+    }
+})
+
 export default router;
