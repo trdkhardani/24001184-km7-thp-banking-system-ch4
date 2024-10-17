@@ -58,4 +58,33 @@ router.get('/api/v1/users', async (req, res) => {
     })
 })
 
+router.get('/api/v1/users/:userId', async (req, res, next) => {
+    const userId = Number(req.params.userId)
+    
+    try {
+        let user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+            include: {profile: true}
+        })
+    
+        if(!user){
+            return res.status(404).json({
+                status: 'failed',
+                message: `User with id ${userId} not found`
+            })
+        }
+
+        return res.json({
+            status: 'success',
+            user_data: user,
+            // profile_data: profile,
+        })
+    } catch(err) {
+        next(err)
+    }
+
+})
+
 export default router;
