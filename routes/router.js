@@ -120,4 +120,47 @@ router.post('/api/v1/accounts', async (req, res, next) => {
     }
 })
 
+router.get('/api/v1/accounts', async (req, res, next) => {
+    try {
+        let accounts = await prisma.bank_Account.findMany({
+            orderBy: {
+                id: 'asc'
+            }
+        })
+
+        return res.json({
+            status: 'success',
+            accounts_data: accounts,
+        })
+    } catch(err) {
+        next(err);
+    }
+})
+
+router.get('/api/v1/accounts/:accountId', async (req, res, next) => {
+    const accId = Number(req.params.accountId)
+    try {
+        let account = await prisma.bank_Account.findUnique({
+            where: {
+                id: accId
+            },
+            include: {user: true}
+        })
+
+        if(!account){
+            return res.status(404).json({
+                status: 'failed',
+                message: `Account with id ${accId} not found`
+            })
+        }
+
+        return res.json({
+            status: 'success',
+            account_data: account
+        })
+    } catch(err) {
+        next(err);
+    }
+})
+
 export default router;
