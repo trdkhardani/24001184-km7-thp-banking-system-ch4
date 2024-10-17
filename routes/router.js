@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 import bcrypt from 'bcrypt';
 
-import express from 'express';
+import express, { response } from 'express';
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -229,6 +229,23 @@ router.post('/api/v1/transactions', async (req, res, next) => {
             source_account: updateSourceAccBalance,
             destination_account: updateDestAccBalance
         }) 
+    } catch(err) {
+        next(err)
+    }
+})
+
+router.get('/api/v1/transactions', async (req, res, next) => {
+    try{
+        let transactions = await prisma.transaction.findMany({
+            orderBy: {
+                id: 'asc'
+            }
+        })
+
+        return res.json({
+            status: 'success',
+            transactions_data: transactions
+        });
     } catch(err) {
         next(err)
     }
