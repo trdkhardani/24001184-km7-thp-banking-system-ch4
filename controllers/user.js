@@ -4,7 +4,7 @@ const router = Router();
 import { PrismaClient, Prisma } from '@prisma/client'
 const prisma = new PrismaClient()
 
-// import Joi, { date } from "joi";
+import validateUser from '../validation/user.js';
 
 const encrypt = (password) => {
     password = btoa(password)
@@ -12,13 +12,26 @@ const encrypt = (password) => {
 }
 
 router.post('/', async (req, res, next) => {
-    let password = req.body.password;
-    password = encrypt(password)
+    const validatedData = {
+        name: req.body.name,
+        password: req.body.password,
+        email: req.body.email,
+        identity_type: req.body.identity_type,
+        identity_number: req.body.identity_number,
+        address: req.body.address,
+    }; 
 
-    let email = req.body.email;
+    const response = validateUser(validatedData)
+
+    if(response.error){
+        return res.status(400).send(response.error.details)
+    }
+    
+    validatedData.password = encrypt(validatedData.password)
+
     let user = await prisma.user.findUnique({
         where: {
-            email: email,
+            email: validatedData.email,
         }
     })
 
@@ -32,15 +45,15 @@ router.post('/', async (req, res, next) => {
     try{
         let user = await prisma.user.create({
             data: {
-                name: req.body.name,
-                email: email,
-                password: password,
+                name: validatedData.name,
+                email: validatedData.email,
+                password: validatedData.password,
                 profile: {
                     create: 
                         {
-                            identity_type: req.body.identity_type,
-                            identity_number: req.body.identity_number,
-                            address: req.body.address
+                            identity_type: validatedData.identity_type,
+                            identity_number: validatedData.identity_number,
+                            address: validatedData.address
                         }
                 }
             },
