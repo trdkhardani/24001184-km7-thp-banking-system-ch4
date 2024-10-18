@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 import validateUser from '../validation/user.js';
 
-const encrypt = (password) => {
+const encrypt = (password) => { // simple password encryption function
     password = btoa(password)
     return password;
 }
@@ -23,19 +23,19 @@ router.post('/', async (req, res, next) => {
 
     const response = validateUser(validatedData)
 
-    if(response.error){
+    if(response.error){ // if the fields don't meet the requirements
         return res.status(400).send(response.error.details)
     }
     
-    validatedData.password = encrypt(validatedData.password)
+    validatedData.password = encrypt(validatedData.password) // encrypt password
 
-    let user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({ // find email that matches with the entered email
         where: {
             email: validatedData.email,
         }
     })
 
-    if(user){
+    if(user){ // if email already exists
         return res.status(409).json({
             status: 'failed',
             message: "Email has already been taken"
@@ -93,7 +93,7 @@ router.get('/:userId', async (req, res, next) => {
             include: {profile: true}
         })
     
-        if(!user){
+        if(!user){ // if no matching data by entered user's id is not found
             return res.status(404).json({
                 status: 'failed',
                 message: `User with id ${userId} not found`
@@ -103,7 +103,6 @@ router.get('/:userId', async (req, res, next) => {
         return res.json({
             status: 'success',
             user_data: user,
-            // profile_data: profile,
         })
     } catch(err) {
         next(err)

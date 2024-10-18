@@ -17,16 +17,16 @@ router.post('/', async (req, res, next) => {
 
     const balance = Number(req.body.balance);
 
-    if(response.error){
+    if(response.error){ // if the fields don't meet the requirements
         return res.status(400).send(response.error.details)
-    } else if(isNaN(balance) || balance < 0){
+    } else if(isNaN(balance) || balance < 0){ // if the balance is a NaN or negative
         return res.status(400).json({
             status: 'failed',
             message: 'Balance must be a positive number'
         })
     }
 
-    let getUserId = await prisma.user.findUnique({
+    let getUserId = await prisma.user.findUnique({ // find user's id
         where: {
             id: validatedData.user_id
         }
@@ -38,12 +38,12 @@ router.post('/', async (req, res, next) => {
         }
     })
 
-    if(!getUserId){
+    if(!getUserId){ // if getUserId can't find matching data of entered user_id
         return res.status(409).json({
             status: 'failed',
             message: `No user with user_id ${req.body.user_id}`
         })
-    } else if(existingAccNumber){
+    } else if(existingAccNumber){ // if account number already exists
         return res.status(409).json({
             status: 'failed',
             message: `Bank account number ${validatedData.bank_account_number} has already taken`
@@ -96,7 +96,7 @@ router.get('/:accountId', async (req, res, next) => {
             include: {user: true}
         })
 
-        if(!account){
+        if(!account){ // if no matching data by entered account's id is not found
             return res.status(404).json({
                 status: 'failed',
                 message: `Account with id ${accId} not found`

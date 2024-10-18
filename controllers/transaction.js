@@ -15,41 +15,41 @@ router.post('/', async (req, res, next) => {
     
     const response = validateTransaction(validatedData);
 
-    if(response.error){
+    if(response.error){ // if the fields don't meet the requirements
         return res.status(400).send(response.error.details);
     }
     
     try {
-        let getSourceAccInfo = await prisma.bank_Account.findUnique({
+        let getSourceAccInfo = await prisma.bank_Account.findUnique({ // fetch data of source bank account
             where: {
                 id: validatedData.source_account_id,
             }
         })
 
-        let getDestAccInfo = await prisma.bank_Account.findUnique({
+        let getDestAccInfo = await prisma.bank_Account.findUnique({ // fetch data of destination bank account
             where: {
                 id: validatedData.destination_account_id
             }
         })
 
-        if(!getSourceAccInfo || !getDestAccInfo){
+        if(!getSourceAccInfo || !getDestAccInfo){ // if getSourceAccInfo or getDestAccInfo can't find matching data of bank_account's id
             return res.status(409).json({
                 status: 'failed',
                 message: `Invalid account id`
             })
-        } else if(validatedData.source_account_id === validatedData.destination_account_id){
+        } else if(validatedData.source_account_id === validatedData.destination_account_id){ // if the entered source_account_id and destination_account_id have the same id
             return res.status(409).json({
                 status: 'failed',
                 message: `Cannot do transaction between same account`
             })
-        } else if(validatedData.amount > getSourceAccInfo.balance){
+        } else if(validatedData.amount > getSourceAccInfo.balance){ // if entered amount is greater than source bank account's balance
             return res.status(409).json({
                 status: 'failed',
                 message: `Insufficient balance`
             })
         }
 
-        let transaction = await prisma.transaction.create({
+        let transaction = await prisma.transaction.create({ // create transaction data
             data: {
                 source_account_id: validatedData.source_account_id,
                 destination_account_id: validatedData.destination_account_id,
@@ -57,7 +57,7 @@ router.post('/', async (req, res, next) => {
             }
         })
 
-        let updateSourceAccBalance = await prisma.bank_Account.update({
+        let updateSourceAccBalance = await prisma.bank_Account.update({ // update source bank_account's balance data
             where: {
                 id: validatedData.source_account_id
             }, 
@@ -66,7 +66,7 @@ router.post('/', async (req, res, next) => {
             }
         })
 
-        let updateDestAccBalance = await prisma.bank_Account.update({
+        let updateDestAccBalance = await prisma.bank_Account.update({ // update destination bank_account's balance data
             where: {
                 id: validatedData.destination_account_id
             }, 
@@ -132,7 +132,7 @@ router.get('/:transaction', async (req, res, next) => {
             }
         })
 
-        if(!transaction){
+        if(!transaction){ // if no matching data by entered transaction's id is not found
             return res.status(404).json({
                 status: 'failed',
                 message: `Transaction with id ${transactionId} not found`
