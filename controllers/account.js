@@ -112,4 +112,29 @@ router.get('/:accountId', async (req, res, next) => {
     }
 })
 
+router.delete('/:accountId', async (req, res, next) => {
+    const accId = Number(req.params.accountId)
+    try {
+        let account = await prisma.bank_Account.delete({
+            where: {
+                id: accId
+            }
+        })
+
+        return res.json({
+            status: 'success',
+            message: `Account with id ${accId} deleted successfully`,
+            deleted_account: account
+        })
+    } catch(err) {
+        if(err.code === 'P2025'){ // if no matching data by entered account's id is not found
+            return res.status(404).json({
+                status: 'failed',
+                message: `Account with id ${accId} not found`
+            })
+        }
+        next(err)
+    }
+})
+
 export default router;
