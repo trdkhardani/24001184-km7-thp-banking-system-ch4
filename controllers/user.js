@@ -29,19 +29,6 @@ router.post('/', async (req, res, next) => {
     
     validatedData.password = encrypt(validatedData.password) // encrypt password
 
-    let user = await prisma.user.findUnique({ // find email that matches with the entered email
-        where: {
-            email: validatedData.email,
-        }
-    })
-
-    if(user){ // if email already exists
-        return res.status(409).json({
-            status: 'failed',
-            message: "Email has already been taken"
-        })
-    }
-
     try{
         let user = await prisma.user.create({
             data: {
@@ -58,13 +45,19 @@ router.post('/', async (req, res, next) => {
                 }
             },
         })
-    
+
         return res.status(201).json({
             status: 'success',
             message: `Successfully added ${user.name}'s data`,
             user: user,
         })
     } catch(err){
+        if(err.code === 'P2002'){ // if email already exists
+            return res.status(409).json({
+                status: 'failed',
+                message: "Email has already been taken"
+            })
+        }
         next(err)
     }
 })
