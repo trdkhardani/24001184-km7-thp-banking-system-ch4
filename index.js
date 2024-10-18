@@ -10,7 +10,7 @@ app.use(express.urlencoded({extended: false}));
 app.use(router);
 
 app.use(function(req, res, next) {
-    res.status(404).json({
+    return res.status(404).json({
         status: 'failed',
         message: 'Not found'
     })
