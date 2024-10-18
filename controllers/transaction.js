@@ -132,7 +132,7 @@ router.get('/:transaction', async (req, res, next) => {
             }
         })
 
-        if(!transaction){ // if no matching data by entered transaction's id is not found
+        if(!transaction){ // if no matching data by entered transaction's id
             return res.status(404).json({
                 status: 'failed',
                 message: `Transaction with id ${transactionId} not found`

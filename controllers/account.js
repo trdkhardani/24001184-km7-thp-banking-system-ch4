@@ -83,7 +83,7 @@ router.get('/:accountId', async (req, res, next) => {
             include: {user: true}
         })
 
-        if(!account){ // if no matching data by entered account's id is not found
+        if(!account){ // if no matching data by entered account's id
             return res.status(404).json({
                 status: 'failed',
                 message: `Account with id ${accId} not found`
@@ -114,7 +114,7 @@ router.delete('/:accountId', async (req, res, next) => {
             deleted_account: account
         })
     } catch(err) {
-        if(err.code === 'P2025'){ // if no matching data by entered account's id is not found
+        if(err.code === 'P2025'){ // if no matching data by entered account's id
             return res.status(404).json({
                 status: 'failed',
                 message: `Account with id ${accId} not found`

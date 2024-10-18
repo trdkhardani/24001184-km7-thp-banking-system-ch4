@@ -86,7 +86,7 @@ router.get('/:userId', async (req, res, next) => {
             include: {profile: true}
         })
     
-        if(!user){ // if no matching data by entered user's id is not found
+        if(!user){ // if no matching data by entered user's id
             return res.status(404).json({
                 status: 'failed',
                 message: `User with id ${userId} not found`
