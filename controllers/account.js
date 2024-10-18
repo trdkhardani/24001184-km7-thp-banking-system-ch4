@@ -26,30 +26,6 @@ router.post('/', async (req, res, next) => {
         })
     }
 
-    let getUserId = await prisma.user.findUnique({ // find user's id
-        where: {
-            id: validatedData.user_id
-        }
-    })
-
-    let existingAccNumber = await prisma.bank_Account.findUnique({
-        where: {
-            bank_account_number: validatedData.bank_account_number
-        }
-    })
-
-    if(!getUserId){ // if getUserId can't find matching data of entered user_id
-        return res.status(409).json({
-            status: 'failed',
-            message: `No user with user_id ${req.body.user_id}`
-        })
-    } else if(existingAccNumber){ // if account number already exists
-        return res.status(409).json({
-            status: 'failed',
-            message: `Bank account number ${validatedData.bank_account_number} has already taken`
-        })
-    }
-
     try {
         let account = await prisma.bank_Account.create({
             data: {
@@ -65,6 +41,17 @@ router.post('/', async (req, res, next) => {
             message: `successfully added account for user_id ${account.user_id}`
         })
     } catch(err) {
+        if(err.code === 'P2003'){ // if no matching data for entered user_id
+            return res.status(409).json({
+                status: 'failed',
+                message: `No user with user_id ${validatedData.user_id}`
+            })
+        } else if(err.code === 'P2002'){ // if account number already exists
+            return res.status(409).json({
+                status: 'failed',
+                message: `Bank account number ${validatedData.bank_account_number} has already taken`
+            })
+        }
         next(err);
     }
 })
